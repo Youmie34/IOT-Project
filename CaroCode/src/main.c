@@ -2,7 +2,7 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <esp_system.h>
-#include "../lib/esp-idf-lib/components/bme680/bme680.h"
+#include "../lib/bme680/bme680.h"
 #include <string.h>
 
 #define SDA_GPIO 22

@@ -16,7 +16,8 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
 #include <esp_err.h>
-#include "../esp_idf_lib_helpers/esp_idf_lib_helpers.h"
+#include <sdkconfig.h>
+#include <esp_idf_lib_helpers.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,6 +28,9 @@ extern "C" {
 #elif HELPER_TARGET_IS_ESP8266
 #define I2CDEV_MAX_STRETCH_TIME 0xffffffff
 #endif
+
+//added
+#define CONFIG_I2CDEV_TIMEOUT 1
 
 /**
  * I2C device descriptor

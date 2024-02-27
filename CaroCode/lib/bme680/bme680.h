@@ -16,7 +16,7 @@
 #define __BME680_H__
 
 #include <stdbool.h>
-#include "../i2cdev/i2cdev.h"
+#include <i2cdev.h>
 #include <esp_err.h>
 
 #ifdef __cplusplus

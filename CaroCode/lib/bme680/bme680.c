@@ -13,7 +13,7 @@
 #include <esp_log.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
-#include "../esp_idf_lib_helpers/esp_idf_lib_helpers.h"
+#include <esp_idf_lib_helpers.h>
 #include "bme680.h"
 
 #define I2C_FREQ_HZ 1000000 // Up to 3.4MHz, but esp-idf only supports 1MHz
@@ -301,8 +301,8 @@ static esp_err_t bme680_get_raw_data(bme680_t *dev, bme680_raw_data_t *raw_data)
      * BME680_REG_MEAS_STATUS_1, BME680_REG_MEAS_STATUS_2
      * These data are not documented and it is not really clear when they are filled
      */
-    ESP_LOGD(TAG, "Raw data: %d %d %d %d %d", raw_data->temperature, raw_data->pressure,
-            raw_data->humidity, raw_data->gas_resistance, raw_data->gas_range);
+    ESP_LOGD(TAG, "Raw data: %d %d %d %d %d", (int)raw_data->temperature, (int)raw_data->pressure,
+            (int)raw_data->humidity, (int)raw_data->gas_resistance, (int)raw_data->gas_range);
 
     return ESP_OK;
 }
@@ -759,7 +759,7 @@ esp_err_t bme680_get_results_fixed(bme680_t *dev, bme680_values_fixed_t *results
     }
 
     ESP_LOGD(TAG, "Fixed point sensor values - %d/100 deg.C, %d/1000 %%, %d Pa, %d Ohm",
-            results->temperature, results->humidity, results->pressure, results->gas_resistance);
+            (int)results->temperature, (int)results->humidity, (int)results->pressure, (int)results->gas_resistance);
 
     return ESP_OK;
 }
