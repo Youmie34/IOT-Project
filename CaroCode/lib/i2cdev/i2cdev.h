@@ -30,7 +30,7 @@ extern "C" {
 #endif
 
 //added
-#define CONFIG_I2CDEV_TIMEOUT 1
+#define CONFIG_I2CDEV_TIMEOUT 1000 // timeout 1 sekunde
 
 /**
  * I2C device descriptor

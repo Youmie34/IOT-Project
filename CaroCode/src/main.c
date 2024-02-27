@@ -5,8 +5,8 @@
 #include "../lib/bme680/bme680.h"
 #include <string.h>
 
-#define SDA_GPIO 22
-#define SCL_GPIO 23
+#define SDA_GPIO 21
+#define SCL_GPIO 22
 #define PORT 0
 #define ADDR BME680_I2C_ADDR_0
 
@@ -22,7 +22,7 @@ void bme680_test(void *pvParamters)
     ESP_ERROR_CHECK(bme680_init_desc(&sensor, ADDR, PORT, SDA_GPIO, SCL_GPIO));
 
     // init the sensor
-    ESP_ERROR_CHECK(bme680_init_sensor(&sensor));
+    ESP_ERROR_CHECK(bme680_init_sensor(&sensor)); //FEHLER
 
     // Changes the oversampling rates to 4x oversampling for temperature
     // and 2x oversampling for humidity. Pressure measurement is skipped.
