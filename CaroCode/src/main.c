@@ -22,7 +22,7 @@ void bme680_test(void *pvParamters)
     ESP_ERROR_CHECK(bme680_init_desc(&sensor, ADDR, PORT, SDA_GPIO, SCL_GPIO));
 
     // init the sensor
-    ESP_ERROR_CHECK(bme680_init_sensor(&sensor)); //FEHLER
+    ESP_ERROR_CHECK(bme680_init_sensor(&sensor)); // FEHLER
 
     // Changes the oversampling rates to 4x oversampling for temperature
     // and 2x oversampling for humidity. Pressure measurement is skipped.
@@ -56,7 +56,7 @@ void bme680_test(void *pvParamters)
             // get the results and do something with them
             if (bme680_get_results_float(&sensor, &values) == ESP_OK)
                 printf("BME680 Sensor: %.2f °C, %.2f %%, %.2f hPa, %.2f Ohm\n",
-                        values.temperature, values.humidity, values.pressure, values.gas_resistance);
+                       values.temperature, values.humidity, values.pressure, values.gas_resistance);
         }
         // passive waiting until 1 second is over
         vTaskDelayUntil(&last_wakeup, 1000 / portTICK_PERIOD_MS);
@@ -68,4 +68,3 @@ void app_main()
     ESP_ERROR_CHECK(i2cdev_init());
     xTaskCreatePinnedToCore(bme680_test, "bme680_test", configMINIMAL_STACK_SIZE * 8, NULL, 5, NULL, APP_CPU_NUM);
 }
-
