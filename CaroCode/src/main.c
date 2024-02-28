@@ -1,147 +1,70 @@
-/*
- * SPDX-FileCopyrightText: 2022-2023 Espressif Systems (Shanghai) CO LTD
- *
- * SPDX-License-Identifier: Apache-2.0
- */
-
 #include <stdio.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include <esp_system.h>
+#include "../lib/bme680/bme680.h"
 #include <string.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "esp_log.h"
-#include "../lib/servo/iot_servo.h"
-#include "../lib/unity/unity.h"
-#include "sdkconfig.h"
 
-#ifdef CONFIG_IDF_TARGET_ESP32
-#define SERVO_CH0_PIN 32
-#define SERVO_CH1_PIN 25
-#define SERVO_CH2_PIN 26
-#define SERVO_CH3_PIN 27
-#define SERVO_CH4_PIN 14
-#define SERVO_CH5_PIN 12
-#define SERVO_CH6_PIN 13
-#define SERVO_CH7_PIN 15
-#define SERVO_CH8_PIN 2
-#define SERVO_CH9_PIN 0
-#define SERVO_CH10_PIN 4
-#define SERVO_CH11_PIN 5
-#define SERVO_CH12_PIN 18
-#define SERVO_CH13_PIN 19
-#define SERVO_CH14_PIN 21
-#define SERVO_CH15_PIN 22
-#elif CONFIG_IDF_TARGET_ESP32S2
-#define SERVO_CH0_PIN 1
-#define SERVO_CH1_PIN 2
-#define SERVO_CH2_PIN 3
-#define SERVO_CH3_PIN 4
-#define SERVO_CH4_PIN 5
-#define SERVO_CH5_PIN 6
-#define SERVO_CH6_PIN 7
-#define SERVO_CH7_PIN 8
+#define SDA_GPIO 21
+#define SCL_GPIO 22
+#define PORT 0
+#define ADDR BME680_I2C_ADDR_0
+
+#if defined(CONFIG_IDF_TARGET_ESP32S2)
+#define APP_CPU_NUM PRO_CPU_NUM
 #endif
 
-static void _set_angle(ledc_mode_t speed_mode, float angle)
+void bme680_test(void *pvParamters)
 {
-    for (size_t i = 0; i < 8; i++) {
-        iot_servo_write_angle(speed_mode, i, angle);
+    bme680_t sensor;
+    memset(&sensor, 0, sizeof(bme680_t));
+
+    ESP_ERROR_CHECK(bme680_init_desc(&sensor, ADDR, PORT, SDA_GPIO, SCL_GPIO));
+
+    // init the sensor
+    ESP_ERROR_CHECK(bme680_init_sensor(&sensor)); // FEHLER
+
+    // Changes the oversampling rates to 4x oversampling for temperature
+    // and 2x oversampling for humidity. Pressure measurement is skipped.
+    bme680_set_oversampling_rates(&sensor, BME680_OSR_4X, BME680_OSR_NONE, BME680_OSR_2X);
+
+    // Change the IIR filter size for temperature and pressure to 7.
+    bme680_set_filter_size(&sensor, BME680_IIR_SIZE_7);
+
+    // Change the heater profile 0 to 200 degree Celcius for 100 ms.
+    bme680_set_heater_profile(&sensor, 0, 200, 100);
+    bme680_use_heater_profile(&sensor, 0);
+
+    // Set ambient temperature to 10 degree Celsius
+    bme680_set_ambient_temperature(&sensor, 10);
+
+    // as long as sensor configuration isn't changed, duration is constant
+    uint32_t duration;
+    bme680_get_measurement_duration(&sensor, &duration);
+
+    TickType_t last_wakeup = xTaskGetTickCount();
+
+    bme680_values_float_t values;
+    while (1)
+    {
+        // trigger the sensor to start one TPHG measurement cycle
+        if (bme680_force_measurement(&sensor) == ESP_OK)
+        {
+            // passive waiting until measurement results are available
+            vTaskDelay(duration);
+
+            // get the results and do something with them
+            if (bme680_get_results_float(&sensor, &values) == ESP_OK)
+                printf("BME680 Sensor: %.2f °C, %.2f %%, %.2f hPa, %.2f Ohm\n",
+                       values.temperature, values.humidity, values.pressure, values.gas_resistance);
+        }
+        // passive waiting until 1 second is over
+        vTaskDelayUntil(&last_wakeup, 1000 / portTICK_PERIOD_MS);
     }
 }
 
-TEST_CASE("Servo_motor test", "[servo][iot]")
+void app_main()
 {
-    servo_config_t servo_cfg_ls = {
-        .max_angle = 180,
-        .min_width_us = 500,
-        .max_width_us = 2500,
-        .freq = 50,
-        .timer_number = LEDC_TIMER_0,
-        .channels = {
-            .servo_pin = {
-                SERVO_CH0_PIN,
-                SERVO_CH1_PIN,
-                SERVO_CH2_PIN,
-                SERVO_CH3_PIN,
-                SERVO_CH4_PIN,
-                SERVO_CH5_PIN,
-                SERVO_CH6_PIN,
-                SERVO_CH7_PIN,
-            },
-            .ch = {
-                LEDC_CHANNEL_0,
-                LEDC_CHANNEL_1,
-                LEDC_CHANNEL_2,
-                LEDC_CHANNEL_3,
-                LEDC_CHANNEL_4,
-                LEDC_CHANNEL_5,
-                LEDC_CHANNEL_6,
-                LEDC_CHANNEL_7,
-            },
-        },
-        .channel_number = 8,
-    } ;
-    TEST_ASSERT(ESP_OK == iot_servo_init(LEDC_LOW_SPEED_MODE, &servo_cfg_ls));
-
-    /**
-     * Only ESP32 has the high speed mode
-     */
-#ifdef CONFIG_IDF_TARGET_ESP32
-    servo_config_t servo_cfg_hs = {
-        .max_angle = 180,
-        .min_width_us = 500,
-        .max_width_us = 2500,
-        .freq = 100,
-        .timer_number = LEDC_TIMER_0,
-        .channels = {
-            .servo_pin = {
-                SERVO_CH8_PIN,
-                SERVO_CH9_PIN,
-                SERVO_CH10_PIN,
-                SERVO_CH11_PIN,
-                SERVO_CH12_PIN,
-                SERVO_CH13_PIN,
-                SERVO_CH14_PIN,
-                SERVO_CH15_PIN,
-            },
-            .ch = {
-                LEDC_CHANNEL_0,
-                LEDC_CHANNEL_1,
-                LEDC_CHANNEL_2,
-                LEDC_CHANNEL_3,
-                LEDC_CHANNEL_4,
-                LEDC_CHANNEL_5,
-                LEDC_CHANNEL_6,
-                LEDC_CHANNEL_7,
-            },
-        },
-        .channel_number = 8,
-    } ;
-    TEST_ASSERT(ESP_OK == iot_servo_init(LEDC_HIGH_SPEED_MODE, &servo_cfg_hs));
-#endif
-
-    size_t i;
-    float angle_ls, angle_hs;
-    for (i = 0; i <= 180; i++) {
-        _set_angle(LEDC_LOW_SPEED_MODE, i);
-#ifdef CONFIG_IDF_TARGET_ESP32
-        _set_angle(LEDC_HIGH_SPEED_MODE, (180 - i));
-#endif
-        vTaskDelay(50 / portTICK_PERIOD_MS);
-        iot_servo_read_angle(LEDC_LOW_SPEED_MODE, 0, &angle_ls);
-#ifdef CONFIG_IDF_TARGET_ESP32
-        iot_servo_read_angle(LEDC_HIGH_SPEED_MODE, 0, &angle_hs);
-#endif
-
-#ifdef CONFIG_IDF_TARGET_ESP32
-        ESP_LOGI("servo", "[%d|%.2f], [%d|%.2f]", i, angle_ls, (180 - i), angle_hs);
-#else
-        ESP_LOGI("servo", "[%d|%.2f]", i, angle_ls);
-        (void)angle_hs;
-#endif
-    }
-
-    iot_servo_deinit(LEDC_LOW_SPEED_MODE);
-#ifdef CONFIG_IDF_TARGET_ESP32
-    iot_servo_deinit(LEDC_HIGH_SPEED_MODE);
-#endif
+    ESP_ERROR_CHECK(i2cdev_init());
+    xTaskCreatePinnedToCore(bme680_test, "bme680_test", configMINIMAL_STACK_SIZE * 8, NULL, 5, NULL, APP_CPU_NUM);
 }
