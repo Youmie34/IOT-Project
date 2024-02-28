@@ -1,70 +1,64 @@
 #include <stdio.h>
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
-#include <esp_system.h>
-#include "../lib/bme680/bme680.h"
-#include <string.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "esp_log.h"
+#include "iot_servo.h"
 
-#define SDA_GPIO 21
-#define SCL_GPIO 22
-#define PORT 0
-#define ADDR BME680_I2C_ADDR_0
+// servo on pin 22 (jumper 6)
+#define SERVO_PIN 22
 
-#if defined(CONFIG_IDF_TARGET_ESP32S2)
-#define APP_CPU_NUM PRO_CPU_NUM
-#endif
-
-void bme680_test(void *pvParamters)
+ // open window
+void openWindow()
 {
-    bme680_t sensor;
-    memset(&sensor, 0, sizeof(bme680_t));
-
-    ESP_ERROR_CHECK(bme680_init_desc(&sensor, ADDR, PORT, SDA_GPIO, SCL_GPIO));
-
-    // init the sensor
-    ESP_ERROR_CHECK(bme680_init_sensor(&sensor)); // FEHLER
-
-    // Changes the oversampling rates to 4x oversampling for temperature
-    // and 2x oversampling for humidity. Pressure measurement is skipped.
-    bme680_set_oversampling_rates(&sensor, BME680_OSR_4X, BME680_OSR_NONE, BME680_OSR_2X);
-
-    // Change the IIR filter size for temperature and pressure to 7.
-    bme680_set_filter_size(&sensor, BME680_IIR_SIZE_7);
-
-    // Change the heater profile 0 to 200 degree Celcius for 100 ms.
-    bme680_set_heater_profile(&sensor, 0, 200, 100);
-    bme680_use_heater_profile(&sensor, 0);
-
-    // Set ambient temperature to 10 degree Celsius
-    bme680_set_ambient_temperature(&sensor, 10);
-
-    // as long as sensor configuration isn't changed, duration is constant
-    uint32_t duration;
-    bme680_get_measurement_duration(&sensor, &duration);
-
-    TickType_t last_wakeup = xTaskGetTickCount();
-
-    bme680_values_float_t values;
-    while (1)
+    for (int angle = 0; angle <= 180; angle += 10)
     {
-        // trigger the sensor to start one TPHG measurement cycle
-        if (bme680_force_measurement(&sensor) == ESP_OK)
-        {
-            // passive waiting until measurement results are available
-            vTaskDelay(duration);
+        iot_servo_write_angle(LEDC_LOW_SPEED_MODE, 0, angle);
+        printf("angle %d\n", angle);
+        vTaskDelay(pdMS_TO_TICKS(500));
+    }
+}
 
-            // get the results and do something with them
-            if (bme680_get_results_float(&sensor, &values) == ESP_OK)
-                printf("BME680 Sensor: %.2f °C, %.2f %%, %.2f hPa, %.2f Ohm\n",
-                       values.temperature, values.humidity, values.pressure, values.gas_resistance);
-        }
-        // passive waiting until 1 second is over
-        vTaskDelayUntil(&last_wakeup, 1000 / portTICK_PERIOD_MS);
+// close window
+void closeWindow()
+{
+    for (int angle = 180; angle >= 0; angle -= 10)
+    {
+        iot_servo_write_angle(LEDC_LOW_SPEED_MODE, 0, angle);
+        printf("angle %d\n", angle);
+        vTaskDelay(pdMS_TO_TICKS(500));
     }
 }
 
 void app_main()
 {
-    ESP_ERROR_CHECK(i2cdev_init());
-    xTaskCreatePinnedToCore(bme680_test, "bme680_test", configMINIMAL_STACK_SIZE * 8, NULL, 5, NULL, APP_CPU_NUM);
+    // configure servo
+    servo_config_t servo_cfg = {
+        .max_angle = 180,
+        .min_width_us = 690,  // equals "0°"
+        .max_width_us = 2780, // equals "180°"
+        .freq = 50,
+        .timer_number = LEDC_TIMER_0,
+        .channels = {
+            .servo_pin = {SERVO_PIN},
+            .ch = {LEDC_CHANNEL_0},
+        },
+        .channel_number = 1,
+    };
+
+    // initialize servo
+    esp_err_t err = iot_servo_init(LEDC_LOW_SPEED_MODE, &servo_cfg);
+    if (err != ESP_OK)
+    {
+        ESP_LOGE("app_main", "Servo initialization failed");
+        vTaskDelete(NULL);
+    }
+
+    //openWindow();
+    closeWindow();
+
+    // deinitialize servo
+    iot_servo_deinit(LEDC_LOW_SPEED_MODE);
+
+    // delete task
+    vTaskDelete(NULL);
 }
