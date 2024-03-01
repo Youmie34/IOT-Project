@@ -23,7 +23,7 @@
 extern "C" {
 #endif
 
-#define BME680_I2C_ADDR_0 0x76
+#define BME680_I2C_ADDR_0 0x76 //I2C adress for BME680
 #define BME680_I2C_ADDR_1 0x77
 
 #define BME680_MAX_OVERFLOW_VAL      INT32_C(0x40000000) // overflow value used in pressure calculation (bme680_convert_pressure)

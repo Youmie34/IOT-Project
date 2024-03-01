@@ -15,7 +15,8 @@
 
 static const char *TAG = "I2CDEV";
 
-typedef struct {
+typedef struct
+{
     SemaphoreHandle_t lock;
     i2c_config_t config;
     bool installed;
@@ -23,21 +24,25 @@ typedef struct {
 
 static i2c_port_state_t states[I2C_NUM_MAX];
 
-#define SEMAPHORE_TAKE(port) do { \
+#define SEMAPHORE_TAKE(port)                                                                \
+    do                                                                                      \
+    {                                                                                       \
         if (!xSemaphoreTake(states[port].lock, CONFIG_I2CDEV_TIMEOUT / portTICK_PERIOD_MS)) \
-        { \
-            ESP_LOGE(TAG, "Could not take port mutex %d", port); \
-            return ESP_ERR_TIMEOUT; \
-        } \
-        } while (0)
+        {                                                                                   \
+            ESP_LOGE(TAG, "Could not take port mutex %d", port);                            \
+            return ESP_ERR_TIMEOUT;                                                         \
+        }                                                                                   \
+    } while (0)
 
-#define SEMAPHORE_GIVE(port) do { \
-        if (!xSemaphoreGive(states[port].lock)) \
-        { \
+#define SEMAPHORE_GIVE(port)                                     \
+    do                                                           \
+    {                                                            \
+        if (!xSemaphoreGive(states[port].lock))                  \
+        {                                                        \
             ESP_LOGE(TAG, "Could not give port mutex %d", port); \
-            return ESP_FAIL; \
-        } \
-        } while (0)
+            return ESP_FAIL;                                     \
+        }                                                        \
+    } while (0)
 
 esp_err_t i2cdev_init()
 {
@@ -60,7 +65,8 @@ esp_err_t i2cdev_done()
 {
     for (int i = 0; i < I2C_NUM_MAX; i++)
     {
-        if (!states[i].lock) continue;
+        if (!states[i].lock)
+            continue;
 
         if (states[i].installed)
         {
@@ -77,7 +83,8 @@ esp_err_t i2cdev_done()
 
 esp_err_t i2c_dev_create_mutex(i2c_dev_t *dev)
 {
-    if (!dev) return ESP_ERR_INVALID_ARG;
+    if (!dev)
+        return ESP_ERR_INVALID_ARG;
 
     ESP_LOGV(TAG, "[0x%02x at %d] creating mutex", dev->addr, dev->port);
 
@@ -93,7 +100,8 @@ esp_err_t i2c_dev_create_mutex(i2c_dev_t *dev)
 
 esp_err_t i2c_dev_delete_mutex(i2c_dev_t *dev)
 {
-    if (!dev) return ESP_ERR_INVALID_ARG;
+    if (!dev)
+        return ESP_ERR_INVALID_ARG;
 
     ESP_LOGV(TAG, "[0x%02x at %d] deleting mutex", dev->addr, dev->port);
 
@@ -103,10 +111,10 @@ esp_err_t i2c_dev_delete_mutex(i2c_dev_t *dev)
 
 esp_err_t i2c_dev_take_mutex(i2c_dev_t *dev)
 {
-    if (!dev) return ESP_ERR_INVALID_ARG;
+    if (!dev)
+        return ESP_ERR_INVALID_ARG;
 
     ESP_LOGV(TAG, "[0x%02x at %d] taking mutex", dev->addr, dev->port);
-
     if (!xSemaphoreTake(dev->mutex, CONFIG_I2CDEV_TIMEOUT / portTICK_PERIOD_MS))
     {
         ESP_LOGE(TAG, "[0x%02x at %d] Could not take device mutex", dev->addr, dev->port);
@@ -117,7 +125,8 @@ esp_err_t i2c_dev_take_mutex(i2c_dev_t *dev)
 
 esp_err_t i2c_dev_give_mutex(i2c_dev_t *dev)
 {
-    if (!dev) return ESP_ERR_INVALID_ARG;
+    if (!dev)
+        return ESP_ERR_INVALID_ARG;
 
     ESP_LOGV(TAG, "[0x%02x at %d] giving mutex", dev->addr, dev->port);
 
@@ -131,20 +140,19 @@ esp_err_t i2c_dev_give_mutex(i2c_dev_t *dev)
 
 inline static bool cfg_equal(const i2c_config_t *a, const i2c_config_t *b)
 {
-    return a->scl_io_num == b->scl_io_num
-        && a->sda_io_num == b->sda_io_num
+    return a->scl_io_num == b->scl_io_num && a->sda_io_num == b->sda_io_num
 #if HELPER_TARGET_IS_ESP32
-        && a->master.clk_speed == b->master.clk_speed
+           && a->master.clk_speed == b->master.clk_speed
 #elif HELPER_TARGET_IS_ESP8266 && HELPER_TARGET_VERSION > HELPER_TARGET_VERSION_ESP8266_V3_2
-        && a->clk_stretch_tick == b->clk_stretch_tick
+           && a->clk_stretch_tick == b->clk_stretch_tick
 #endif
-        && a->scl_pullup_en == b->scl_pullup_en
-        && a->sda_pullup_en == b->sda_pullup_en;
+           && a->scl_pullup_en == b->scl_pullup_en && a->sda_pullup_en == b->sda_pullup_en;
 }
 
 static esp_err_t i2c_setup_port(const i2c_dev_t *dev)
 {
-    if (dev->port >= I2C_NUM_MAX) return ESP_ERR_INVALID_ARG;
+    if (dev->port >= I2C_NUM_MAX)
+        return ESP_ERR_INVALID_ARG;
 
     esp_err_t res;
     if (!cfg_equal(&dev->cfg, &states[dev->port].config))
@@ -161,7 +169,9 @@ static esp_err_t i2c_setup_port(const i2c_dev_t *dev)
         if ((res = i2c_param_config(dev->port, &temp)) != ESP_OK)
             return res;
         if ((res = i2c_driver_install(dev->port, temp.mode, 0, 0, 0)) != ESP_OK)
+        {
             return res;
+        }
 #endif
 #if HELPER_TARGET_IS_ESP8266
 #if HELPER_TARGET_VERSION > HELPER_TARGET_VERSION_ESP8266_V3_2
@@ -181,11 +191,29 @@ static esp_err_t i2c_setup_port(const i2c_dev_t *dev)
 #if HELPER_TARGET_IS_ESP32
     int t;
     if ((res = i2c_get_timeout(dev->port, &t)) != ESP_OK)
+    {
         return res;
+    }
+
     // Timeout cannot be 0
-    uint32_t ticks = dev->timeout_ticks ? dev->timeout_ticks : I2CDEV_MAX_STRETCH_TIME;
+    // changed einzeiler to if-clause for better understanding
+    uint32_t ticks;
+    if (dev->timeout_ticks != 0)
+    {
+        ticks = dev->timeout_ticks;
+    }
+    else
+    {
+        ticks = I2CDEV_MAX_STRETCH_TIME;
+    }
+
+    /*uint32_t ticks = dev->timeout_ticks ? dev->timeout_ticks : I2CDEV_MAX_STRETCH_TIME;
+     */
     if ((ticks != t) && (res = i2c_set_timeout(dev->port, ticks)) != ESP_OK)
+    {
+        ESP_LOGD(TAG, "Timeout: ticks = %ld (%ld usec) on port %d", dev->timeout_ticks, (dev->timeout_ticks / 80), dev->port);
         return res;
+    }
     ESP_LOGD(TAG, "Timeout: ticks = %u (%u usec) on port %d", (unsigned int)dev->timeout_ticks, (unsigned int)(dev->timeout_ticks / 80), dev->port);
 #endif
 
@@ -194,7 +222,8 @@ static esp_err_t i2c_setup_port(const i2c_dev_t *dev)
 
 esp_err_t i2c_dev_read(const i2c_dev_t *dev, const void *out_data, size_t out_size, void *in_data, size_t in_size)
 {
-    if (!dev || !in_data || !in_size) return ESP_ERR_INVALID_ARG;
+    if (!dev || !in_data || !in_size)
+        return ESP_ERR_INVALID_ARG;
 
     SEMAPHORE_TAKE(dev->port);
 
@@ -226,11 +255,12 @@ esp_err_t i2c_dev_read(const i2c_dev_t *dev, const void *out_data, size_t out_si
 
 esp_err_t i2c_dev_write(const i2c_dev_t *dev, const void *out_reg, size_t out_reg_size, const void *out_data, size_t out_size)
 {
-    if (!dev || !out_data || !out_size) return ESP_ERR_INVALID_ARG;
-
+    if (!dev || !out_data || !out_size)
+        return ESP_ERR_INVALID_ARG;
     SEMAPHORE_TAKE(dev->port);
 
     esp_err_t res = i2c_setup_port(dev);
+
     if (res == ESP_OK)
     {
         i2c_cmd_handle_t cmd = i2c_cmd_link_create();
@@ -245,19 +275,18 @@ esp_err_t i2c_dev_write(const i2c_dev_t *dev, const void *out_reg, size_t out_re
             ESP_LOGE(TAG, "Could not write to device [0x%02x at %d]: %d", dev->addr, dev->port, res);
         i2c_cmd_link_delete(cmd);
     }
-
     SEMAPHORE_GIVE(dev->port);
     return res;
 }
 
 esp_err_t i2c_dev_read_reg(const i2c_dev_t *dev, uint8_t reg,
-        void *in_data, size_t in_size)
+                           void *in_data, size_t in_size)
 {
     return i2c_dev_read(dev, &reg, 1, in_data, in_size);
 }
 
 esp_err_t i2c_dev_write_reg(const i2c_dev_t *dev, uint8_t reg,
-        const void *out_data, size_t out_size)
+                            const void *out_data, size_t out_size)
 {
     return i2c_dev_write(dev, &reg, 1, out_data, out_size);
 }
