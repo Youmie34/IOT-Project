@@ -235,7 +235,6 @@ static inline esp_err_t read_reg_8_nolock(bme680_t *dev, uint8_t reg, uint8_t *d
 //FEHLER
 static inline esp_err_t write_reg_8_nolock(bme680_t *dev, uint8_t reg, uint8_t data)
 {
-    printf("write_reg_8_nolock\n");
     return i2c_dev_write_reg(&dev->i2c_dev, reg, &data, 1);
 }
 
@@ -568,11 +567,8 @@ esp_err_t bme680_free_desc(bme680_t *dev)
 
 esp_err_t bme680_init_sensor(bme680_t *dev)
 {
-    // added
     CHECK_ARG(dev);
-
     I2C_DEV_TAKE_MUTEX(&dev->i2c_dev);
-    printf("bme680_init_sensor1\n");
     dev->meas_started = false;
     dev->meas_status = 0;
     dev->settings.ambient_temperature = 0;
@@ -583,16 +579,9 @@ esp_err_t bme680_init_sensor(bme680_t *dev)
     dev->settings.heater_profile = BME680_HEATER_NOT_USED;
     memset(dev->settings.heater_temperature, 0, sizeof(uint16_t) * 10);
     memset(dev->settings.heater_duration, 0, sizeof(uint16_t) * 10);
-
-    printf("bme680_init_sensor2\n");
     // reset the sensor
-    // FEHLER
     I2C_DEV_CHECK(&dev->i2c_dev, write_reg_8_nolock(dev, BME680_REG_RESET, BME680_RESET_CMD));
-    // FEHLER
-    printf("bme680_init_sensor3\n");
-
     vTaskDelay(pdMS_TO_TICKS(BME680_RESET_PERIOD));
-    printf("bme680_init_sensor4\n");
     uint8_t chip_id = 0;
     I2C_DEV_CHECK(&dev->i2c_dev, read_reg_8_nolock(dev, BME680_REG_ID, &chip_id));
     if (chip_id != 0x61)

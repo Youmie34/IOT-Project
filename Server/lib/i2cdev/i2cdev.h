@@ -24,7 +24,9 @@ extern "C" {
 #endif
 
 #if HELPER_TARGET_IS_ESP32
-//changed
+//changed value to decimal
+//I2CDEV_MAX_STRETCH_TIME matches the I2C_LL_MAX_TIMEOUT in the i2c.h library 
+//to ensure i2c communication
 #define I2CDEV_MAX_STRETCH_TIME 1048575
 #elif HELPER_TARGET_IS_ESP8266
 #define I2CDEV_MAX_STRETCH_TIME 0xffffffff

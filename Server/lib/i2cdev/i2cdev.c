@@ -149,10 +149,8 @@ inline static bool cfg_equal(const i2c_config_t *a, const i2c_config_t *b)
            && a->scl_pullup_en == b->scl_pullup_en && a->sda_pullup_en == b->sda_pullup_en;
 }
 
-// HAUPTFEHLER
 static esp_err_t i2c_setup_port(const i2c_dev_t *dev)
 {
-    printf("i2c_setup_port\n");
     if (dev->port >= I2C_NUM_MAX)
         return ESP_ERR_INVALID_ARG;
 
@@ -172,7 +170,6 @@ static esp_err_t i2c_setup_port(const i2c_dev_t *dev)
             return res;
         if ((res = i2c_driver_install(dev->port, temp.mode, 0, 0, 0)) != ESP_OK)
         {
-            printf("i2c_setup_port1");
             return res;
         }
 #endif
@@ -195,12 +192,11 @@ static esp_err_t i2c_setup_port(const i2c_dev_t *dev)
     int t;
     if ((res = i2c_get_timeout(dev->port, &t)) != ESP_OK)
     {
-        printf("i2c_setup_port2");
         return res;
     }
 
     // Timeout cannot be 0
-    // changed
+    // changed einzeiler to if-clause for better understanding
     uint32_t ticks;
     if (dev->timeout_ticks != 0)
     {
@@ -212,26 +208,17 @@ static esp_err_t i2c_setup_port(const i2c_dev_t *dev)
     }
 
     /*uint32_t ticks = dev->timeout_ticks ? dev->timeout_ticks : I2CDEV_MAX_STRETCH_TIME;
-    printf("Timeout_ticks: %ld\n", dev->timeout_ticks);
-    printf("i2c_setup_port3");
-*/
-    // ERROR
+     */
     if ((ticks != t) && (res = i2c_set_timeout(dev->port, ticks)) != ESP_OK)
     {
-        printf("i2c_setup_port4\n");
-        printf("Timeout_ticks: %ld\n", ticks);
         ESP_LOGD(TAG, "Timeout: ticks = %ld (%ld usec) on port %d", dev->timeout_ticks, (dev->timeout_ticks / 80), dev->port);
         return res;
     }
-    // ERROR
-
-    printf("i2c_setup_port5");
     ESP_LOGD(TAG, "Timeout: ticks = %u (%u usec) on port %d", (unsigned int)dev->timeout_ticks, (unsigned int)(dev->timeout_ticks / 80), dev->port);
 #endif
 
     return ESP_OK;
 }
-// HAUPTFEHLER
 
 esp_err_t i2c_dev_read(const i2c_dev_t *dev, const void *out_data, size_t out_size, void *in_data, size_t in_size)
 {
@@ -265,20 +252,15 @@ esp_err_t i2c_dev_read(const i2c_dev_t *dev, const void *out_data, size_t out_si
     SEMAPHORE_GIVE(dev->port);
     return res;
 }
-// FEHLER
+
 esp_err_t i2c_dev_write(const i2c_dev_t *dev, const void *out_reg, size_t out_reg_size, const void *out_data, size_t out_size)
 {
-    printf("i2c_dev_write1\n");
     if (!dev || !out_data || !out_size)
         return ESP_ERR_INVALID_ARG;
-    printf("i2c_dev_write1.1\n");
     SEMAPHORE_TAKE(dev->port);
-    printf("i2c_dev_write1.2\n");
 
-    // FEHLER
     esp_err_t res = i2c_setup_port(dev);
-    // FEHLER
-    printf("i2c_dev_write2\n");
+
     if (res == ESP_OK)
     {
         i2c_cmd_handle_t cmd = i2c_cmd_link_create();
@@ -293,9 +275,7 @@ esp_err_t i2c_dev_write(const i2c_dev_t *dev, const void *out_reg, size_t out_re
             ESP_LOGE(TAG, "Could not write to device [0x%02x at %d]: %d", dev->addr, dev->port, res);
         i2c_cmd_link_delete(cmd);
     }
-    printf("i2c_dev_write3\n");
     SEMAPHORE_GIVE(dev->port);
-    printf("i2c_dev_write4\n");
     return res;
 }
 
@@ -305,10 +285,8 @@ esp_err_t i2c_dev_read_reg(const i2c_dev_t *dev, uint8_t reg,
     return i2c_dev_read(dev, &reg, 1, in_data, in_size);
 }
 
-// FEHLER
 esp_err_t i2c_dev_write_reg(const i2c_dev_t *dev, uint8_t reg,
                             const void *out_data, size_t out_size)
 {
-    printf("i2c_dev_write_reg\n");
     return i2c_dev_write(dev, &reg, 1, out_data, out_size);
 }
