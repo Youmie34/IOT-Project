@@ -24,13 +24,14 @@ extern "C" {
 #endif
 
 #if HELPER_TARGET_IS_ESP32
-#define I2CDEV_MAX_STRETCH_TIME 0x00ffffff
+//changed
+#define I2CDEV_MAX_STRETCH_TIME 1048575
 #elif HELPER_TARGET_IS_ESP8266
 #define I2CDEV_MAX_STRETCH_TIME 0xffffffff
 #endif
 
 //added
-#define CONFIG_I2CDEV_TIMEOUT 1000 // timeout 1 sekunde
+#define CONFIG_I2CDEV_TIMEOUT 1000 // I2C transaction timeout, milliseconds
 
 /**
  * I2C device descriptor

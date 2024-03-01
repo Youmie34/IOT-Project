@@ -21,8 +21,13 @@ void bme680_test(void *pvParamters)
 
     ESP_ERROR_CHECK(bme680_init_desc(&sensor, ADDR, PORT, SDA_GPIO, SCL_GPIO));
 
+printf("main\n");
     // init the sensor
-    ESP_ERROR_CHECK(bme680_init_sensor(&sensor)); // FEHLER
+    esp_err_t res = bme680_init_sensor(&sensor);
+    if (res != ESP_OK) {
+        printf("Failed to initialize BME680 sensor: %d\n", res);
+        vTaskDelete(NULL);
+    }
 
     // Changes the oversampling rates to 4x oversampling for temperature
     // and 2x oversampling for humidity. Pressure measurement is skipped.
