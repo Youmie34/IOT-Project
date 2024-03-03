@@ -5,8 +5,6 @@ body {
     background-image: url('img/sunflower.jpg');
     background-size: cover;
     /* Das Bild wird die gesamte Fläche des Body ausfüllen */
-    background-repeat: no-repeat;
-    /* Das Bild wird nicht wiederholt */
     margin: 0;
 }
 
@@ -32,6 +30,7 @@ input {
     background: antiquewhite;
     color: brown;
     text-align: center;
+    border: 8px inset brown;
 }
 
 #main {
@@ -41,6 +40,7 @@ input {
     /* Auto-Margin links und rechts */
     margin-top: 70px; /* Verschiebung um 20 Pixel nach unten */
     background-color: antiquewhite;
+    border: 4px inset brown;
 }
 
 #save {
