@@ -8,6 +8,8 @@
 #include "esp_event.h"
 #include <string.h>
 #include "esp_http_server.h"
+#include "esp_http_client.h"
+#include "nvs_flash.h"
 #include "../../credentials/credentials.h"
 #include "iot_servo.h"
 #include "servo.h"
@@ -20,7 +22,6 @@ static void wifi_event_handler(void *, esp_event_base_t, int32_t, void *);
 httpd_handle_t start_webserver(void);
 esp_err_t get_root_handler(httpd_req_t *);
 esp_err_t get_example_handler(httpd_req_t *);
-
 
 static void wifi_init()
 {
@@ -121,16 +122,22 @@ esp_err_t get_example_handler(httpd_req_t *req)
 
 void app_main()
 {
-   //startServo(1);
+    // startServo(1);
 
-   wifi_init();
+    wifi_init();
 
     while (true)
     {
         if (wifi_established)
         {
+            ESP_LOGI(TAG, "Wifi established!");
             // WiFi Verbindung hergestellt
-            start_webserver();
+            // start_webserver();
+        }
+        else
+        {
+            // WiFi connection is not yet established
+            ESP_LOGI(TAG, "Waiting for WiFi connection...");
         }
 
         vTaskDelay(1000 / portTICK_PERIOD_MS); // wait 100 ms
