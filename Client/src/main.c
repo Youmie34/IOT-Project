@@ -5,14 +5,14 @@
 #include "esp_wifi.h"
 #include "esp_check.h"
 #include "esp_log.h"
+#include "iot_servo.h"
+#include "servo.h"
 #include "esp_event.h"
 #include <string.h>
 #include "esp_http_server.h"
 #include "esp_http_client.h"
 #include "nvs_flash.h"
 #include "../../credentials/credentials.h"
-#include "iot_servo.h"
-#include "servo.h"
 
 bool wifi_established = false;
 char *TAG = "Event_Handling";
@@ -22,6 +22,8 @@ static void wifi_event_handler(void *, esp_event_base_t, int32_t, void *);
 httpd_handle_t start_webserver(void);
 esp_err_t get_root_handler(httpd_req_t *);
 esp_err_t get_example_handler(httpd_req_t *);
+// value from the server
+int param;
 
 static void wifi_init()
 {
@@ -122,9 +124,8 @@ esp_err_t get_example_handler(httpd_req_t *req)
 
 void app_main()
 {
-    // startServo(1);
-
-    wifi_init();
+    // TODO: tasks for controlling window and receive/send via wifi
+    /*wifi_init();
 
     while (true)
     {
@@ -141,5 +142,18 @@ void app_main()
         }
 
         vTaskDelay(1000 / portTICK_PERIOD_MS); // wait 100 ms
+    }
+    */
+
+    param = 0;
+    // TODO: openWindow if 1, closeWindow if 0
+    if (param == 1)
+    {
+        openWindow();
+    }
+
+    else if (param == 0)
+    {
+        closeWindow();
     }
 }

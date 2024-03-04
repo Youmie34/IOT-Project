@@ -16,16 +16,18 @@ servo_config_t servo_cfg = {
 
 void ledOn()
 {
-    gpio_set_direction(SERVO_LED, GPIO_MODE_OUTPUT); // set GPIO as output
-    gpio_set_level(SERVO_LED, 0);                    // set GPIO low , LED goes on
-    vTaskDelay(1000 / portTICK_PERIOD_MS);           // wait 100 ms
-    gpio_set_level(SERVO_LED, 1);                    // set GPIO high , LED goes off
-    vTaskDelay(1000 / portTICK_PERIOD_MS);           // wait 100 ms
+    gpio_set_level(SERVO_LED, 1); // set GPIO low , LED goes on
+}
+
+void ledOff()
+{
+    gpio_set_level(SERVO_LED, 0); // set GPIO low , LED goes off
 }
 
 // open window
 void openWindow()
 {
+    initServo();
     for (int angle = 0; angle <= 180; angle += 10)
     {
         // TODO: LED to show movement
@@ -34,11 +36,14 @@ void openWindow()
         printf("angle %d\n", angle);
         vTaskDelay(pdMS_TO_TICKS(500));
     }
+    ledOff();
+    deinitServo();
 }
 
 // close window
 void closeWindow()
 {
+    initServo();
     for (int angle = 180; angle >= 0; angle -= 10)
     {
         // TODO: LED to show movement
@@ -47,10 +52,14 @@ void closeWindow()
         printf("angle %d\n", angle);
         vTaskDelay(pdMS_TO_TICKS(500));
     }
+    ledOff();
+    deinitServo();
 }
 
-void startServo(int param)
+void initServo()
 {
+    gpio_set_direction(SERVO_LED, GPIO_MODE_OUTPUT); // set GPIO as output
+
     // initialize servo
     esp_err_t err = iot_servo_init(LEDC_LOW_SPEED_MODE, &servo_cfg);
     if (err != ESP_OK)
@@ -58,18 +67,11 @@ void startServo(int param)
         ESP_LOGE("app_main", "Servo initialization failed");
         vTaskDelete(NULL);
     }
+}
 
-    // TODO: openWindow if 1, closeWindow if 0
-    if (param == 1)
-    {
-        openWindow();
-    }
-
-    else if (param == 0)
-    {
-        closeWindow();
-    }
-   // deinitialize servo
+void deinitServo()
+{
+    // deinitialize servo
     iot_servo_deinit(LEDC_LOW_SPEED_MODE);
 
     // delete task

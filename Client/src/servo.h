@@ -11,21 +11,19 @@
 #define SERVO_PIN 22
 #define SERVO_LED 18
 
-//TODO: return 1 if action is completed
- // open window
+// TODO: return 1 if action is completed
+//  open window
 void openWindow();
-
 // close window
 void closeWindow();
 
-//parameter
+// initiate Servo
+void initServo();
+// deinitiate Servo
+void deinitServo();
 
-
-//initiate Servo
-void startServo(int param);
-
-//TODO: new task for led
+// TODO: new task for led
 void ledOn();
-
+void ledOff();
 
 #endif /* _SERVO_H_ */
