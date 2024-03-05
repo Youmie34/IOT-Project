@@ -8,7 +8,7 @@
 #include "esp_event.h"
 #include <string.h>
 #include "esp_http_server.h"
-#include "credentials.h"
+#include "../../credentials/credentials.h"
 
 bool wifi_established = false;
 char *TAG = "Event_Handling";
