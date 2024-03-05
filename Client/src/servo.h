@@ -11,7 +11,7 @@
 #define SERVO_PIN 22
 #define SERVO_LED 18
 
-// TODO: return 1 if action is completed
+// TODO: change 180° to 90°/45°
 //  open window
 void openWindow();
 // close window
