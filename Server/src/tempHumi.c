@@ -1,19 +1,27 @@
 #include "tempHumi.h"
 
-void bme680_test(void *pvParamters)
+// definition of global variables
+bme680_t sensor;
+float humi;
+float temp;
+
+void bme680_init()
 {
-    bme680_t sensor;
     memset(&sensor, 0, sizeof(bme680_t));
 
     ESP_ERROR_CHECK(bme680_init_desc(&sensor, ADDR, PORT, SDA_GPIO, SCL_GPIO));
 
     // init the sensor
     esp_err_t res = bme680_init_sensor(&sensor);
-    if (res != ESP_OK) {
+    if (res != ESP_OK)
+    {
         printf("Failed to initialize BME680 sensor: %d\n", res);
         vTaskDelete(NULL);
     }
+}
 
+void bme680_config()
+{
     // Changes the oversampling rates to 4x oversampling for temperature
     // and 2x oversampling for humidity. Pressure measurement is skipped.
     bme680_set_oversampling_rates(&sensor, BME680_OSR_4X, BME680_OSR_NONE, BME680_OSR_2X);
@@ -27,28 +35,47 @@ void bme680_test(void *pvParamters)
 
     // Set ambient temperature to 10 degree Celsius
     bme680_set_ambient_temperature(&sensor, 10);
+}
 
+void startMeasurement()
+{
     // as long as sensor configuration isn't changed, duration is constant
     uint32_t duration;
     bme680_get_measurement_duration(&sensor, &duration);
-
-    TickType_t last_wakeup = xTaskGetTickCount();
-
+    // values measured by the bme680
     bme680_values_float_t values;
-    while (1)
-    {
-        // trigger the sensor to start one TPHG measurement cycle
-        if (bme680_force_measurement(&sensor) == ESP_OK)
-        {
-            // passive waiting until measurement results are available
-            vTaskDelay(duration);
 
-            // get the results and do something with them
-            if (bme680_get_results_float(&sensor, &values) == ESP_OK)
-                printf("BME680 Sensor: %.2f °C, %.2f %%, %.2f hPa, %.2f Ohm\n",
-                       values.temperature, values.humidity, values.pressure, values.gas_resistance);
+    // trigger the sensor to start one TPHG measurement cycle
+    if (bme680_force_measurement(&sensor) == ESP_OK)
+    {
+        // passive waiting until measurement results are available
+        vTaskDelay(duration);
+
+        // get the results and do something with them
+        if (bme680_get_results_float(&sensor, &values) == ESP_OK)
+        {
+            setTemp(values.temperature);
+            setHumi(values.humidity);
         }
-        // passive waiting until 1 second is over
-        vTaskDelayUntil(&last_wakeup, 1000 / portTICK_PERIOD_MS);
     }
+}
+
+void setTemp(float measuredTemp)
+{
+    temp = measuredTemp;
+}
+
+void setHumi(float measuredHumi)
+{
+    humi = measuredHumi;
+}
+
+float getTemp()
+{
+    return temp;
+}
+
+float getHumi()
+{
+    return humi;
 }
