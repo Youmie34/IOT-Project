@@ -22,6 +22,23 @@ static void wifi_event_handler(void *, esp_event_base_t, int32_t, void *);
 httpd_handle_t start_webserver(void);
 esp_err_t get_root_handler(httpd_req_t *);
 esp_err_t get_example_handler(httpd_req_t *);
+esp_err_t get_favicon_handler(httpd_req_t *);
+
+void app_main()
+{
+    wifi_init();
+    start_webserver();
+
+    /*while (true)
+    {
+        if (wifi_established)
+        {
+            // WiFi Verbindung hergestellt
+        }
+
+        vTaskDelay(1000 / portTICK_PERIOD_MS); // wait 100 ms
+    }*/
+}
 
 static void wifi_init()
 {
@@ -87,10 +104,19 @@ httpd_uri_t uri_get_example = {
     .handler = get_example_handler,
     .user_ctx = NULL};
 
+/* URI handler structure for another GET / uri */
+httpd_uri_t uri_get_favicon = {
+    .uri = "/favicon.ico",
+    .method = HTTP_GET,
+    .handler = get_favicon_handler,
+    .user_ctx = NULL};
+
 httpd_handle_t start_webserver(void)
 {
     /* Generate default configuration */
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
+    /* Port 80*/
+    config.server_port = 80;
     /* Empty handle to esp_http_server */
     httpd_handle_t server = NULL;
     /* Start the httpd server */
@@ -99,6 +125,7 @@ httpd_handle_t start_webserver(void)
         /* Register URI handlers */
         httpd_register_uri_handler(server, &uri_get_root);
         httpd_register_uri_handler(server, &uri_get_example);
+        httpd_register_uri_handler(server, &uri_get_favicon);
     }
 
     return server;
@@ -106,40 +133,28 @@ httpd_handle_t start_webserver(void)
 
 esp_err_t get_root_handler(httpd_req_t *req)
 {
+    httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
     /* Send a simple response */
     const char resp[] = "Hello World!";
     httpd_resp_send(req, resp, HTTPD_RESP_USE_STRLEN);
+    openWindow();
     return ESP_OK;
 }
 
 esp_err_t get_example_handler(httpd_req_t *req)
 {
+    httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
     /* Send a simple response */
     const char resp[] = "Hello World von Example!";
     httpd_resp_send(req, resp, HTTPD_RESP_USE_STRLEN);
     return ESP_OK;
 }
 
-void app_main()
+esp_err_t get_favicon_handler(httpd_req_t *req)
 {
-    // startServo(1);
-
-    wifi_init();
-
-    while (true)
-    {
-        if (wifi_established)
-        {
-            ESP_LOGI(TAG, "Wifi established!");
-            // WiFi Verbindung hergestellt
-            // start_webserver();
-        }
-        else
-        {
-            // WiFi connection is not yet established
-            ESP_LOGI(TAG, "Waiting for WiFi connection...");
-        }
-
-        vTaskDelay(1000 / portTICK_PERIOD_MS); // wait 100 ms
-    }
+    httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
+    /* Send a simple response */
+    const char resp[] = "";
+    httpd_resp_send(req, resp, HTTPD_RESP_USE_STRLEN);
+    return ESP_OK;
 }
