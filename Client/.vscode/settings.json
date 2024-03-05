@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "inttypes.h": "c",
-        "iot_servo.h": "c"
+        "iot_servo.h": "c",
+        "servo.h": "c"
     }
 }
