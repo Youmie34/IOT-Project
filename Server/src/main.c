@@ -7,6 +7,20 @@
 
 void app_main()
 {
+    // settings for i2c communication with bme680
     ESP_ERROR_CHECK(i2cdev_init());
-    xTaskCreatePinnedToCore(bme680_test, "bme680_test", configMINIMAL_STACK_SIZE * 8, NULL, 5, NULL, APP_CPU_NUM);
+    bme680_init();
+    bme680_config();
+
+    TickType_t last_wakeup = xTaskGetTickCount();
+
+    while (1)
+    {
+        startMeasurement();
+        float temp = getTemp();
+        float humi = getHumi();
+        printf("Temperatur: %.2f °C, Humidität: %.2f %%\n", temp, humi);
+        // passive waiting until 1 second is over
+        vTaskDelayUntil(&last_wakeup, 1000 / portTICK_PERIOD_MS);
+    }
 }

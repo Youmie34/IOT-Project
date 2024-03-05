@@ -17,6 +17,22 @@
 #define APP_CPU_NUM PRO_CPU_NUM
 #endif
 
-void bme680_test(void *pvParamters);
+// bme680 sensor
+extern bme680_t sensor;
+// global variables for humidity and temperatur
+extern float humi;
+extern float temp;
+
+void bme680_init();
+void bme680_config();
+void startMeasurement();
+
+// setter
+void setTemp(float measuredTemp);
+void setHumi(float measuredHumi);
+
+// getter
+float getTemp();
+float getHumi();
 
 #endif /* __TEMPHUMI__H__ */
