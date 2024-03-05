@@ -11,20 +11,19 @@
 #define SERVO_PIN 22
 #define SERVO_LED 18
 
-// TODO: return 1 if action is completed
-//  open window
 // TODO: change 180° to 90°/45°
+//  open window
 void openWindow();
-
 // close window
 void closeWindow();
 
-// parameter
-
 // initiate Servo
-void startServo(int param);
+void initServo();
+// deinitiate Servo
+void deinitServo();
 
 // TODO: new task for led
 void ledOn();
+void ledOff();
 
 #endif /* _SERVO_H_ */
