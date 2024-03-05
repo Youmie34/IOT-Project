@@ -103,6 +103,8 @@ httpd_handle_t start_webserver(void)
 {
     /* Generate default configuration */
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
+    /* Port 80*/
+    config.server_port = 80;
     /* Empty handle to esp_http_server */
     httpd_handle_t server = NULL;
     /* Start the httpd server */
