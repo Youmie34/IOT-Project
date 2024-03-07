@@ -60,19 +60,6 @@ httpd_uri_t uri_get_root = {
     .method = HTTP_GET,
     .handler = get_root_handler,
     .user_ctx = NULL};
-/* URI handler structure for another GET / uri */
-httpd_uri_t uri_get_example = {
-    .uri = "/example",
-    .method = HTTP_GET,
-    .handler = get_example_handler,
-    .user_ctx = NULL};
-
-/* URI handler structure for another GET / uri */
-httpd_uri_t uri_get_favicon = {
-    .uri = "/favicon.ico",
-    .method = HTTP_GET,
-    .handler = get_favicon_handler,
-    .user_ctx = NULL};
 
 httpd_uri_t uri_get_open = {
     .uri = "/open",
@@ -99,8 +86,6 @@ httpd_handle_t start_webserver(void)
     {
         /* Register URI handlers */
         httpd_register_uri_handler(server, &uri_get_root);
-        httpd_register_uri_handler(server, &uri_get_example);
-        httpd_register_uri_handler(server, &uri_get_favicon);
         httpd_register_uri_handler(server, &uri_get_open);
         httpd_register_uri_handler(server, &uri_get_close);
     }
@@ -117,31 +102,13 @@ esp_err_t get_root_handler(httpd_req_t *req)
     return ESP_OK;
 }
 
-esp_err_t get_example_handler(httpd_req_t *req)
-{
-    httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
-    /* Send a simple response */
-    const char resp[] = "Hello World von Example!";
-    httpd_resp_send(req, resp, HTTPD_RESP_USE_STRLEN);
-    return ESP_OK;
-}
-
-esp_err_t get_favicon_handler(httpd_req_t *req)
-{
-    httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
-    /* Send a simple response */
-    const char resp[] = "";
-    httpd_resp_send(req, resp, HTTPD_RESP_USE_STRLEN);
-    return ESP_OK;
-}
-
 esp_err_t get_open_handler(httpd_req_t *req)
 {
     httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
     /* Send a simple response */
     const char resp[] = "Fenster wird geöffnet";
     httpd_resp_send(req, resp, HTTPD_RESP_USE_STRLEN);
-    openWindow();
+    xTaskCreate(openWindow, "open Window", configMINIMAL_STACK_SIZE, NULL, 5, NULL);
     return ESP_OK;
 }
 
@@ -149,8 +116,8 @@ esp_err_t get_close_handler(httpd_req_t *req)
 {
     httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
     /* Send a simple response */
-    const char resp[] = "Fenster wird geöffnet";
+    const char resp[] = "Fenster wird geschlossen";
     httpd_resp_send(req, resp, HTTPD_RESP_USE_STRLEN);
-    closeWindow();
+    xTaskCreate(closeWindow, "close Window", configMINIMAL_STACK_SIZE, NULL, 5, NULL);
     return ESP_OK;
 }

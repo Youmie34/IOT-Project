@@ -3,8 +3,8 @@
 // configure servo
 servo_config_t servo_cfg = {
     .max_angle = 180,
-    .min_width_us = 690,  // equals "0°"
-    .max_width_us = 2780, // equals "180°"
+    .min_width_us = 600,  // equals "0°"
+    .max_width_us = 2000, // equals "180°"
     .freq = 50,
     .timer_number = LEDC_TIMER_0,
     .channels = {
@@ -28,13 +28,13 @@ void ledOff()
 void openWindow()
 {
     initServo();
-    for (int angle = 0; angle <= 180; angle += 10)
+    for (int angle = 90; angle >= 0; angle -= 10)
     {
-        // TODO: LED to show movement
+        // LED to show movement
         ledOn();
         iot_servo_write_angle(LEDC_LOW_SPEED_MODE, 0, angle);
         printf("angle %d\n", angle);
-        vTaskDelay(pdMS_TO_TICKS(500));
+        vTaskDelay(pdMS_TO_TICKS(250));
     }
     ledOff();
     deinitServo();
@@ -44,13 +44,13 @@ void openWindow()
 void closeWindow()
 {
     initServo();
-    for (int angle = 180; angle >= 0; angle -= 10)
+    for (int angle = 0; angle <= 90; angle += 10)
     {
         // TODO: LED to show movement
         ledOn();
         iot_servo_write_angle(LEDC_LOW_SPEED_MODE, 0, angle);
         printf("angle %d\n", angle);
-        vTaskDelay(pdMS_TO_TICKS(500));
+        vTaskDelay(pdMS_TO_TICKS(250));
     }
     ledOff();
     deinitServo();
@@ -58,8 +58,6 @@ void closeWindow()
 
 void initServo()
 {
-    gpio_set_direction(SERVO_LED, GPIO_MODE_OUTPUT); // set GPIO as output
-
     // initialize servo
     esp_err_t err = iot_servo_init(LEDC_LOW_SPEED_MODE, &servo_cfg);
     if (err != ESP_OK)

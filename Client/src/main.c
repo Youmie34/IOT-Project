@@ -11,6 +11,8 @@
 
 void app_main()
 {
+    gpio_set_direction(SERVO_LED, GPIO_MODE_OUTPUT); // set SERVO_LED as output
+    gpio_set_level(SERVO_LED, 0);                    // set GPIO low , LED goes off
     wifi_init();
     start_webserver();
 }
