@@ -34,7 +34,7 @@ void openWindow()
         ledOn();
         iot_servo_write_angle(LEDC_LOW_SPEED_MODE, 0, angle);
         printf("angle %d\n", angle);
-        vTaskDelay(pdMS_TO_TICKS(500));
+        vTaskDelay(pdMS_TO_TICKS(250));
     }
     ledOff();
     deinitServo();
@@ -50,7 +50,7 @@ void closeWindow()
         ledOn();
         iot_servo_write_angle(LEDC_LOW_SPEED_MODE, 0, angle);
         printf("angle %d\n", angle);
-        vTaskDelay(pdMS_TO_TICKS(500));
+        vTaskDelay(pdMS_TO_TICKS(250));
     }
     ledOff();
     deinitServo();

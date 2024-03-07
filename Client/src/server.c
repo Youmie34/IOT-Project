@@ -108,7 +108,7 @@ esp_err_t get_open_handler(httpd_req_t *req)
     /* Send a simple response */
     const char resp[] = "Fenster wird geöffnet";
     httpd_resp_send(req, resp, HTTPD_RESP_USE_STRLEN);
-    openWindow();
+    xTaskCreate(openWindow, "open Window", configMINIMAL_STACK_SIZE, NULL, 5, NULL);
     return ESP_OK;
 }
 
@@ -118,6 +118,6 @@ esp_err_t get_close_handler(httpd_req_t *req)
     /* Send a simple response */
     const char resp[] = "Fenster wird geschlossen";
     httpd_resp_send(req, resp, HTTPD_RESP_USE_STRLEN);
-    closeWindow();
+    xTaskCreate(closeWindow, "close Window", configMINIMAL_STACK_SIZE, NULL, 5, NULL);
     return ESP_OK;
 }
