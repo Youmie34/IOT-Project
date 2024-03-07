@@ -8,19 +8,26 @@
 #include <string.h>
 #include "wifi.h"
 #include "server.h"
+#include "client.h"
 
 void app_main()
 {
     wifi_init();
     start_webserver();
 
-    /*while (true)
+    while (true)
     {
         if (wifi_established)
         {
             // WiFi Verbindung hergestellt
+
+            printf("Wifi funktioniert\n");
+
+        } else
+        {
+            printf("Wifi doe not work\n");
         }
 
         vTaskDelay(1000 / portTICK_PERIOD_MS); // wait 100 ms
-    }*/
+    }
 }
