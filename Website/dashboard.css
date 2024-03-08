@@ -38,7 +38,8 @@ input {
     /* Breite des divs */
     margin: 0 auto;
     /* Auto-Margin links und rechts */
-    margin-top: 70px; /* Verschiebung um 20 Pixel nach unten */
+    margin-top: 70px;
+    /* Verschiebung um 20 Pixel nach unten */
     background-color: antiquewhite;
     border: 4px inset brown;
 }
@@ -49,4 +50,15 @@ input {
     margin: 0 auto;
     /* Auto-Margin links und rechts */
     text-align: center;
+}
+
+#control {
+    width: 300px;
+    /* Breite des divs */
+    margin: 0 auto;
+    /* Auto-Margin links und rechts */
+    margin-top: 30px;
+    text-align: center;
+    background-color: antiquewhite;
+    border: 4px inset brown;
 }
