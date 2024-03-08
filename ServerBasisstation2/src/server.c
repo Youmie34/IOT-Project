@@ -89,6 +89,8 @@ esp_err_t get_open_handler(httpd_req_t *req)
     /* Send a simple response */
     const char resp[] = "open";
     httpd_resp_send(req, resp, HTTPD_RESP_USE_STRLEN);
+    char url[] = "http://192.168.110.223/open";
+    urlAufruf(url);
     printf("Fenster wird geoeffnet.\n");
     return ESP_OK;
 }
@@ -99,6 +101,8 @@ esp_err_t get_close_handler(httpd_req_t *req)
     /* Send a simple response */
     const char resp[] = "close";
     httpd_resp_send(req, resp, HTTPD_RESP_USE_STRLEN);
+    char url[] = "http://192.168.110.223/close";
+    urlAufruf(url);
     printf("Fenster wird geschlossen.\n");
     return ESP_OK;
 }
