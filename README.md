@@ -1,5 +1,11 @@
 # IOT-Project
 
+## Sebastian
+wifi-connection, client-server-connection, dashboard 
+
+## Caroline
+bme680/servo-code, dashboard
+
 ## Connection:
 Code to exchange data between server and client microcontroller
 
