@@ -26,6 +26,7 @@ void app_main()
 
     // settings for i2c communication with bme680
     ESP_ERROR_CHECK(i2cdev_init());
+    // initializing and configuration for the bme680
     bme680_init();
     bme680_config();
 
@@ -33,11 +34,9 @@ void app_main()
 
     while (true)
     {
-
         if (wifi_established)
         {
-            // WiFi Verbindung hergestellt
-
+            // measure temperatur and humidity
             startMeasurement();
             int temp = (int)getTemp();
             int humi = (int)getHumi();
@@ -46,7 +45,7 @@ void app_main()
             {
                 printf("fenster zu\n");
             }
-            if(window == auf)
+            if (window == auf)
             {
                 printf("fenster offen\n");
             }*/
@@ -57,7 +56,7 @@ void app_main()
                 urlAufruf(urlOpen);
                 window = auf;
             }
-            if((temp <= 25 && humi <= 80) && window == auf)
+            if ((temp <= 25 && humi <= 80) && window == auf)
             {
                 printf("Fenster schließen wird gesendet\n");
                 urlAufruf(urlClose);
@@ -69,6 +68,6 @@ void app_main()
             printf("Keine Verbindung zum Wlan\n");
         }
 
-        vTaskDelay(1000 / portTICK_PERIOD_MS); // wait 100 ms
+        vTaskDelay(1000 / portTICK_PERIOD_MS); // wait 1s
     }
 }

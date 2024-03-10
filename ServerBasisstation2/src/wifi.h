@@ -2,7 +2,7 @@
 #include "esp_log.h"
 #include "esp_event.h"
 #include "esp_wifi.h"
-#include "credentials.h"
+#include "../../credentials/credentials.h"
 
 extern bool wifi_established;
 extern char *TAG;

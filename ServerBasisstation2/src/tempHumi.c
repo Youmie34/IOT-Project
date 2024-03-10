@@ -7,8 +7,10 @@ float temp;
 
 void bme680_init()
 {
+    // initialize memory for the bme680 sensor to 0
     memset(&sensor, 0, sizeof(bme680_t));
 
+    // initialize device descriptor, address for bme680 0x76
     ESP_ERROR_CHECK(bme680_init_desc(&sensor, ADDR, PORT, SDA_GPIO, SCL_GPIO));
 
     // init the sensor
@@ -51,7 +53,7 @@ void startMeasurement()
         // passive waiting until measurement results are available
         vTaskDelay(duration);
 
-        // get the results and do something with them
+        // get the results and set them
         if (bme680_get_results_float(&sensor, &values) == ESP_OK)
         {
             setTemp(values.temperature);
