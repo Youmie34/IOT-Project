@@ -10,6 +10,7 @@
 #include "server.h"
 #include "client.h"
 #include "tempHumi.h"
+#include "urlEsp.h"
 
 enum fenster
 {
@@ -28,7 +29,7 @@ void app_main()
     bme680_init();
     bme680_config();
 
-    TickType_t last_wakeup = xTaskGetTickCount();
+    //TickType_t last_wakeup = xTaskGetTickCount();
 
     while (true)
     {
@@ -41,27 +42,25 @@ void app_main()
             int temp = (int)getTemp();
             int humi = (int)getHumi();
             printf("Temperatur: %d °C, Humidität: %d%%\n", temp, humi);
-            if(window == zu)
+            /*if(window == zu)
             {
                 printf("fenster zu\n");
             }
             if(window == auf)
             {
                 printf("fenster offen\n");
-            }
+            }*/
 
             if ((temp >= 25 || humi >= 80) && window == zu)
             {
                 printf("Fenster oeffnen wird gesendet\n");
-                char url[] = "http://192.168.110.223/open";
-                urlAufruf(url);
+                urlAufruf(urlOpen);
                 window = auf;
             }
             if((temp <= 25 && humi <= 80) && window == auf)
             {
                 printf("Fenster schließen wird gesendet\n");
-                char url[] = "http://192.168.110.223/close";
-                urlAufruf(url);
+                urlAufruf(urlClose);
                 window = zu;
             }
         }

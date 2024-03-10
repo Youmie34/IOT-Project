@@ -1,4 +1,5 @@
 #include "server.h"
+#include "urlEsp.h"
 
 /* URI handler structure for GET / uri */
 httpd_uri_t uri_get_root = {
@@ -89,8 +90,7 @@ esp_err_t get_open_handler(httpd_req_t *req)
     /* Send a simple response */
     const char resp[] = "open";
     httpd_resp_send(req, resp, HTTPD_RESP_USE_STRLEN);
-    char url[] = "http://192.168.110.223/open";
-    urlAufruf(url);
+    urlAufruf(urlClose);
     printf("Fenster wird geoeffnet.\n");
     return ESP_OK;
 }
@@ -101,8 +101,7 @@ esp_err_t get_close_handler(httpd_req_t *req)
     /* Send a simple response */
     const char resp[] = "close";
     httpd_resp_send(req, resp, HTTPD_RESP_USE_STRLEN);
-    char url[] = "http://192.168.110.223/close";
-    urlAufruf(url);
+    urlAufruf(urlClose);
     printf("Fenster wird geschlossen.\n");
     return ESP_OK;
 }
