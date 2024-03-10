@@ -30,8 +30,6 @@ void app_main()
     bme680_init();
     bme680_config();
 
-    //TickType_t last_wakeup = xTaskGetTickCount();
-
     while (true)
     {
         if (wifi_established)
@@ -41,15 +39,6 @@ void app_main()
             int temp = (int)getTemp();
             int humi = (int)getHumi();
             printf("Temperatur: %d °C, Humidität: %d%%\n", temp, humi);
-            /*if(window == zu)
-            {
-                printf("fenster zu\n");
-            }
-            if (window == auf)
-            {
-                printf("fenster offen\n");
-            }*/
-
             if ((temp >= 25 || humi >= 80) && window == zu)
             {
                 printf("Fenster oeffnen wird gesendet\n");

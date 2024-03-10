@@ -7,7 +7,7 @@ wifi-connection, client-server-connection, dashboard
 bme680/servo-code, dashboard
 
 ## Connection:
-Code to exchange data between website and server and srver and client microcontroller
+Code to exchange data between website and server and server and client microcontroller
 
 ## Servo:
 Code to turn the servo on and off
