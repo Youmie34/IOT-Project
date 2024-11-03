@@ -20,3 +20,6 @@ Graphical Interface to adjust the min/max values for temp/humi, open and close t
 
 ## !Things to adjust for presentation!
 ip addresses in dashboard and server
+
+## Disclamer
+This code is provided "as-is" without any warranties or guarantees. Use it at your own risk. We are not responsible for any issues, damages, or data loss that may result from using this repository
